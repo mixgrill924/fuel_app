@@ -3,17 +3,17 @@ import requests
 import pprint
 from datetime import datetime
 
-# fuel function today
-def today_fuel(product_id, day):
+# fuel function | today and tomorrow
+def get_fuel(product_id, day):
     url = 'http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product='+str(product_id)+'&Suburb=Midvale&Surrounding=no'+str(day)
     data1 = feedparser.parse(url)
     return data1['entries']
 
 # fuel function tomorrow
-def tomorrow_fuel(product_id, day):
-    url = 'http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product='+str(product_id)+'&Suburb=Midvale&Surrounding=no'+str(day)
-    data3 = feedparser.parse(url)
-    return data3['entries']
+#def tomorrow_fuel(product_id, day):
+#    url = 'http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product='+str(product_id)+'&Suburb=Midvale&Surrounding=no'+str(day)
+#    data3 = feedparser.parse(url)
+#    return data3['entries']
 
 # product_id
 unleaded = 1
@@ -24,12 +24,12 @@ tod = "today"
 tom = "tomorrow"
 
 # variables - today
-today_unleaded_prices = today_fuel(unleaded, tod)
-today_premium_unleaded_prices = today_fuel(premium_unleaded, tod)
+today_unleaded_prices = get_fuel(unleaded, tod)
+today_premium_unleaded_prices = get_fuel(premium_unleaded, tod)
 
 # variables - tomorrow
-tomorrow_unleaded_prices = tomorrow_fuel(unleaded, tom)
-tomorrow_premium_unleaded_prices = tomorrow_fuel(premium_unleaded, tom)
+tomorrow_unleaded_prices = get_fuel(unleaded, tom)
+tomorrow_premium_unleaded_prices = get_fuel(premium_unleaded, tom)
 
 # today
 # unleaded petroleum 
@@ -63,7 +63,7 @@ print('There are', len(data1.entries), 'fuel stations in Midvale.')
 # notify user what the output is
 time_date = datetime.now().strftime("%H:%M:%S")
 print(" ")
-print("Last updated at", time_date + ".")
+print("Last updated on", time_date + ".")
 print(" ")
 print("Today's Fuel Prices are:")
 newList = []
@@ -113,15 +113,25 @@ print(newList2)
 # start html
 table_content = ''
 
-for item in combined_dict:
+#for item in combined_dict:
+for item in newList2:
     #combined_dict = str(combined_dict) + '<li>' + str(price_str) + '</li>'
     #print('code line 140')
     #print(combined_dict)
     table_row = "<tr><td>(price_str)</td><td>(brand_str)</td><td>(address_str)</td><td>(location_str)</td>"
     table_content = table_content + table_row
+    # variables
+    price_str = ia['price']
+    brand_str = ia['brand']
+    address_str = ia['address']
+    location_str = ia['location']
+    # print
+    print(type(item),item,"blah")
+    print("-newList2 -")
+    print(newList2)
 
 # html table layout
-html_content = """
+html_content = '''
 <html>
     <head>
         <title>Fuel Watch [WA]</title>
@@ -143,7 +153,7 @@ html_content = """
             </tbody>
         </table>
     </body>
-</html>""".format(table_content)
+</html>'''.format(table_content)
 
 # write code to html table file
 f = open('D:\\Laptop\\Documents\\PythonWA\\table.html', 'w')
