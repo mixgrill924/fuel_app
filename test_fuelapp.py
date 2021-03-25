@@ -4,156 +4,105 @@ import pprint
 from datetime import datetime
 
 # fuel function | today and tomorrow
-def get_fuel(product_id, day):
-    url = 'http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product='+str(product_id)+'&Suburb=Midvale&Surrounding=no'+str(day)
+def get_fuel(product_id, suburb, day):
+    url = 'http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product='+str(product_id)+'&Suburb='+str(suburb)+'&Surrounding=no'+'&Day='+str(day)+''
     data1 = feedparser.parse(url)
-    return data1['entries']
+    #return data1['entries']
+    refinedList = []
 
-# fuel function tomorrow
-#def tomorrow_fuel(product_id, day):
-#    url = 'http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product='+str(product_id)+'&Suburb=Midvale&Surrounding=no'+str(day)
-#    data3 = feedparser.parse(url)
-#    return data3['entries']
+    #fuelList = [
+    #    {
+            # Price | Brand | Address | Location #
+    #        'price':    float(info['price']),
+    #        'brand':    info['brand'],
+    #        'address':  info['address'],
+    #        'location': info['location']
+    #    }
+    #return(fuelList)
 
-# product_id
+    for value in data1['entries']:
+        refinedList.append(value['price'])
+        refinedList.append(value['brand'])
+        refinedList.append(value['address'])
+        refinedList.append(value['location'])
+    return(refinedList)
+
+# var: product_id
 unleaded = 1
 premium_unleaded = 2
 
-# day
-tod = "today"
-tom = "tomorrow"
+# var: day
+tod = 'today'
+tom = 'tomorrow'
+
+midland = 'midland'
 
 # variables - today
-today_unleaded_prices = get_fuel(unleaded, tod)
-today_premium_unleaded_prices = get_fuel(premium_unleaded, tod)
+today_unleaded_prices = get_fuel(unleaded, 'midvale', tod)
+today_premium_unleaded_prices = get_fuel(premium_unleaded, 'midvale', tod)
 
 # variables - tomorrow
-tomorrow_unleaded_prices = get_fuel(unleaded, tom)
-tomorrow_premium_unleaded_prices = get_fuel(premium_unleaded, tom)
+tomorrow_unleaded_prices = get_fuel(unleaded, 'midvale', tom)
+tomorrow_premium_unleaded_prices = get_fuel(premium_unleaded, 'midvale', tom)
 
-# today
-# unleaded petroleum 
-data1 = feedparser.parse('http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product=1&Suburb=Midvale&Surrounding=no&today')
-# premium unleaded petroleum
-data2 = feedparser.parse('http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product=2&Suburb=Midvale&Surrounding=no&today')
-
-# tomorrow
-# unleaded petroleum
-data3 = feedparser.parse('http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product=1&Suburb=Midvale&Surrounding=no&tomorrow')
-# premium unleaded petroleum
-data4 = feedparser.parse('http://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS?Product=2&Suburb=Midvale&Surrounding=no&tomorrow')
+# variables - combined unleaded - today and tomorrow
+comb_unleaded = [today_unleaded_prices] + [tomorrow_unleaded_prices]
+comb_unleaded = [x for x in comb_unleaded if x]
+print('print comb_unleased')
+print(comb_unleaded)
 
 # -----
 # 15/02/2021, 10:31PM
-# Search: how to manipulate a rss feed in python
-# Info: https://www.tutorialspoint.com/python_text_processing/python_reading_rss_feed.htm
-print("--- FuelFinder App Started ---")
+print('--- FuelFinder App Started ---')
 
 # print the number of fuel stations in Midvale
-print('There are', len(data1.entries), 'fuel stations in Midvale.')
+#print('There are', len(data1.entries), 'fuel stations in Midvale.')
 
-# To-Do: displays brands on one line
-# print the brands of the fuel stations in Midvale
-# list3 = []
-# for items in data.entries:
-#     print(items.brand, '=', items.price + '¢')
-# -----
-
-## today
-# notify user what the output is
-time_date = datetime.now().strftime("%H:%M:%S")
-print(" ")
-print("Last updated on", time_date + ".")
-print(" ")
-print("Today's Fuel Prices are:")
-newList = []
-
-for i in data1.entries:
-    price_str = i['price']
-    brand_str = i['brand']
-    address_str = i['address']
-    location_str = i['location']
-    # custom dictionary
-    combined_dict = {'when': 'today', 'price': price_str, 'brand': brand_str, 'address': address_str, 'location': location_str}
-    newList.append(combined_dict)
-
-# fuel stations 
-# output of newList
-print(newList)
-print(" ")
+## time retrieved
+time_date = datetime.now().strftime('%H:%M:%S')
+print('Last updated on', time_date + '.')
 
 ## tomorrow
-# notify user what the output is
-print("Note: Correct prices are only available after 2:30pm (AWST)")
-print("Tomorrow's Fuel Prices are:")
-newList2 = []
+print("Note: Tomorrow's fuel prices are only available after 2:30pm (AWST)")
 
-for ia in data3.entries:
-    price_str = ia['price']
-    brand_str = ia['brand']
-    address_str = ia['address']
-    location_str = ia['location']
-    combined_dict = {'when': 'tomorrow', 'price': price_str, 'brand': brand_str, 'address': address_str, 'location': location_str}
-    newList2.append(combined_dict)
+def byPrice(item):
+    return item[0]
+sorted_CombUnleaded = sorted(comb_unleaded, key=byPrice)
 
-# fuel stations
-# output of newList2
-print(newList2)
-
-
-
-# PRINT: unleaded, today and tomorrow
-#pprint.pprint (
-#    get_fuel(unleaded, tod) + get_fuel(unleaded, tom)
-#)
-
-
-
-
-# start html
+# parameters
+# Price | Brand | Address | Location
 table_content = ''
-
-#for item in combined_dict:
-for item in newList2:
-    #combined_dict = str(combined_dict) + '<li>' + str(price_str) + '</li>'
-    #print('code line 140')
-    #print(combined_dict)
-    table_row = "<tr><td>(price_str)</td><td>(brand_str)</td><td>(address_str)</td><td>(location_str)</td>"
-    table_content = table_content + table_row
-    # variables
-    price_str = ia['price']
-    brand_str = ia['brand']
-    address_str = ia['address']
-    location_str = ia['location']
-    # print
-    print(type(item),item,"blah")
-    print("-newList2 -")
-    print(newList2)
+for y in sorted_CombUnleaded:
+    table_content = table_content + '<td>' + y[0] + '</td>'
+    table_content = table_content + '<td>' + y[1] + '</td>'
+    table_content = table_content + '<td>' + y[2] + '</td>'
+    table_content = table_content + '<td>' + y[3] + '</td>'
+    table_content = table_content + '</tr>'
 
 # html table layout
-html_content = '''
+html_content = f'''
 <html>
     <head>
         <title>Fuel Watch [WA]</title>
     </head>
 
     <body>
-        <h2>Fuel Watch [WA]</h2>
+        <h2>Fuel Watch | WA</h2>
         <table>
-            <thead>
                 <tr>
                     <th>Price</th>
                     <th>Brand</th>
                     <th>Address</th>
                     <th>Location</th>
                 </tr>
-            <thead>
             <tbody>
-                {0}
+                <tr>
+                    {table_content}
+                </tr>
             </tbody>
         </table>
     </body>
-</html>'''.format(table_content)
+</html>'''
 
 # write code to html table file
 f = open('D:\\Laptop\\Documents\\PythonWA\\table.html', 'w')
